@@ -30,28 +30,31 @@ Este guia descreve o setup real do projeto `meu-app`, já com plugin custom para
 
 Na raiz de `meu-app`:
 
-  # Android (build + sync + assembleDebug)
-  npm run cap:sync:android:flutter
+# Android (build + sync + assembleDebug)
 
-  # iOS (build + sync + reinjecao do plugin + pod install)
-  npm run cap:sync:ios:flutter
+npm run cap:sync:android:flutter
 
-  # Ambos
-  npm run cap:sync:all:flutter
+# iOS (build + sync + reinjecao do plugin + pod install)
+
+npm run cap:sync:ios:flutter
+
+# Ambos
+
+npm run cap:sync:all:flutter
 
 ## Validação Android
 
-  cd meu-app
-  npm run cap:sync:android:flutter
+cd meu-app
+npm run cap:sync:android:flutter
 
 Saída esperada: `BUILD SUCCESSFUL` no Gradle (`android/app` debug).
 
 ## Validação iOS
 
-  cd meu-app
-  npm run cap:sync:ios:flutter
-  cd ios/App
-  xcodebuild -workspace App.xcworkspace -scheme App -configuration Debug -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 16' build
+cd meu-app
+npm run cap:sync:ios:flutter
+cd ios/App
+xcodebuild -workspace App.xcworkspace -scheme App -configuration Debug -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 16' build
 
 Saída esperada: build concluído sem erros de compilação.
 
