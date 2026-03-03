@@ -1,0 +1,59 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>Home — Ionic 7</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-subtitle>Ionic 7 + Flutter Hybrid</ion-card-subtitle>
+      <ion-card-title>{{ title }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>Esta e a <strong>Pagina Home do Ionic 7</strong>.</p>
+      <p>Voce pode navegar para outra pagina Ionic, ou abrir uma tela Flutter
+         diretamente daqui usando o FlutterRouterPlugin.</p>
+      <ion-chip color="success" *ngIf="isNative">
+        <ion-label>Rodando como App Nativo</ion-label>
+      </ion-chip>
+      <ion-chip color="warning" *ngIf="!isNative">
+        <ion-label>Browser — Navegacao Flutter desabilitada</ion-label>
+      </ion-chip>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-list-header><ion-label>Paginas Ionic</ion-label></ion-list-header>
+
+  <ion-item button detail (click)="goToAbout()">
+    <ion-icon name="information-circle-outline" slot="start" color="primary"></ion-icon>
+    <ion-label>
+      <h2>About</h2>
+      <p>Pagina About — Ionic 7</p>
+    </ion-label>
+  </ion-item>
+
+  <ion-list-header><ion-label>Paginas Flutter</ion-label></ion-list-header>
+
+  <ion-item button detail (click)="goToFlutterHome()" [disabled]="!isNative">
+    <ion-icon name="rocket-outline" slot="start" color="tertiary"></ion-icon>
+    <ion-label>
+      <h2>Flutter Home</h2>
+      <p>Abre FlutterActivity na rota /flutter-home</p>
+    </ion-label>
+  </ion-item>
+
+  <ion-item button detail (click)="goToFlutterDetail()" [disabled]="!isNative">
+    <ion-icon name="layers-outline" slot="start" color="tertiary"></ion-icon>
+    <ion-label>
+      <h2>Flutter Detail</h2>
+      <p>Abre FlutterActivity na rota /flutter-detail</p>
+    </ion-label>
+  </ion-item>
+
+  <ion-note class="ion-padding" *ngIf="!isNative">
+    As paginas Flutter so funcionam no device/emulador nativo.
+  </ion-note>
+
+</ion-content>

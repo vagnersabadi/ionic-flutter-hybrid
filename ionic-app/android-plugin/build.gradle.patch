@@ -1,0 +1,11 @@
+// =============================================================
+// PATCH: android/app/build.gradle
+// Adicione esta dependencia na secao "dependencies {}"
+// =============================================================
+
+dependencies {
+    // ... suas outras dependencias ...
+
+    // Flutter module como biblioteca
+    implementation project(':flutter')
+}
