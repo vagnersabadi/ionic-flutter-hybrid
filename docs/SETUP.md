@@ -1,81 +1,62 @@
-# SETUP.md - Guia de Configuracao
+# SETUP.md - Guia de Configuração (estado atual)
 
-## Pre-requisitos
+Este guia descreve o setup real do projeto `meu-app`, já com plugin custom para navegação Ionic <-> Flutter.
 
-- Node.js 18+ | npm install -g @ionic/cli @capacitor/cli
+## Pré-requisitos
+
+- Node.js 18+
 - Flutter SDK 3.x no PATH
-- Android Studio + SDK (Android 33+)
-- Xcode 15+ (iOS)
+- Android Studio + Android SDK
+- Xcode 15+
+- CocoaPods
+- Java 22 (build Android local)
 
-## PASSO 1 - Criar Projeto Ionic 7
+## Estrutura alvo
 
-ionic start meu-app blank --type=angular --capacitor
-cd meu-app
-ionic capacitor add android
-ionic capacitor add ios
+- Ionic/Capacitor: `meu-app`
+- Flutter module: `meu-app/flutter_module`
+- Plugin TS: `meu-app/src/plugins/flutter-router`
+- Plugin Android: `meu-app/android/app/src/main/java/io/ionic/starter/plugins`
+- Plugin iOS: `meu-app/ios/App/App/FlutterRouterPlugin.swift`
 
-## PASSO 2 - Criar Flutter Module
+## Fluxo de navegação
 
-flutter create --template=module flutter_module
+1. Ionic chama `navigateTo` no plugin `FlutterRouter`
+2. Native abre Flutter (`HybridFlutterActivity` no Android / `FlutterViewController` no iOS)
+3. Flutter retorna com `goBack` no MethodChannel `com.example.hybrid/flutter_router`
+4. Plugin resolve a Promise no Ionic com o payload de retorno
 
-## PASSO 3 - Integrar no Android
+## Comandos recomendados
 
-a) Copie FlutterRouterPlugin.kt para:
-android/app/src/main/java/com/example/ionicflutterhybrid/plugins/
+Na raiz de `meu-app`:
 
-b) Copie MainActivity.kt para:
-android/app/src/main/java/com/example/ionicflutterhybrid/
+  # Android (build + sync + assembleDebug)
+  npm run cap:sync:android:flutter
 
-c) Aplique settings.gradle.patch ao android/settings.gradle
+  # iOS (build + sync + reinjecao do plugin + pod install)
+  npm run cap:sync:ios:flutter
 
-Observacao importante: "aplicar patch" aqui significa mesclar o conteudo do patch no arquivo,
+  # Ambos
+  npm run cap:sync:all:flutter
 
-Trecho final esperado em android/settings.gradle:
+## Validação Android
 
-- manter `apply from: 'capacitor.settings.gradle'`
-- adicionar:
-  setBinding(new Binding([gradle: this]))
-  apply from: '../flutter_module/.android/include_flutter.groovy'
+  cd meu-app
+  npm run cap:sync:android:flutter
 
-d) Aplique build.gradle.patch ao android/app/build.gradle
+Saída esperada: `BUILD SUCCESSFUL` no Gradle (`android/app` debug).
 
-Adicione a dependencia abaixo dentro de `dependencies {}` em android/app/build.gradle:
-implementation project(':flutter')
+## Validação iOS
 
-## PASSO 4 - Integrar no iOS
+  cd meu-app
+  npm run cap:sync:ios:flutter
+  cd ios/App
+  xcodebuild -workspace App.xcworkspace -scheme App -configuration Debug -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 16' build
 
-a) Copie FlutterRouterPlugin.swift para ios/App/App/
+Saída esperada: build concluído sem erros de compilação.
 
-b) Aplique Podfile.patch ao ios/App/Podfile
+## Observações importantes
 
-c) cd ios && pod install
-
-## PASSO 5 - Build Android
-
-ionic build
-npx cap sync android
-cd android && ./gradlew assembleDebug
-
-## PASSO 6 - Build iOS
-
-ionic build
-npx cap sync ios
-npx cap open ios
-
-## Fluxo de Navegacao
-
-Ionic Page
---> FlutterRouterPlugin.navigateTo({ route: '/flutter-home' })
---> FlutterActivity (Android) / FlutterViewController (iOS)
---> Flutter GoRouter navega para rota
---> MethodChannel.invokeMethod('goBack')
---> Ionic Promise resolvida, app volta
-
-## Performance - Engine Pre-aquecido (Android recomendado)
-
-No Application.onCreate():
-val engine = FlutterEngine(this)
-engine.dartExecutor.executeDartEntrypoint(DartExecutor.DartEntrypoint.createDefault())
-FlutterEngineCache.getInstance().put("main_engine", engine)
-
-No plugin, use withCachedEngine("main_engine") para navegacao instantanea.
+- Após `cap sync ios`, o script `scripts/ensure-ios-flutter-router.mjs` garante reinjeção do `FlutterRouterPlugin` no `capacitor.config.json` iOS.
+- Warnings de script `[CP-User] ... Flutter Build ...` no iOS podem aparecer e não bloqueiam o build.
+- Se o Android falhar por JDK, confirme que o Java 22 está instalado e acessível via `JAVA_HOME`.
