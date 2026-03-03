@@ -120,6 +120,8 @@ entao nao gera suas proprias pastas nativas. Ele e compilado como
     flutter create --template=module flutter_module
 
     # 3. Copiar os arquivos deste repo (ver docs/SETUP.md)
+    #    e mesclar os patches nos arquivos Gradle
+    #    (nao usar apply from para arquivos .patch)
 
     # 4. Build Android
     ionic build && npx cap sync android
