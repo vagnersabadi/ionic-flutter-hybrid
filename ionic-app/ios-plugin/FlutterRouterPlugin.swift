@@ -13,7 +13,7 @@ public class FlutterRouterPlugin: CAPPlugin {
 
     // MARK: - Properties
     private static let channelName = "com.example.hybrid/flutter_router"
-    private static var sharedEngine: FlutterEngine?
+    private var activeEngine: FlutterEngine?
     private var activeChannel: FlutterMethodChannel?
 
     // MARK: - CAPPlugin Methods
@@ -45,29 +45,24 @@ public class FlutterRouterPlugin: CAPPlugin {
     // MARK: - Private
 
     private func launchFlutter(route: String, params: [String: Any], call: CAPPluginCall) {
+        let engine = FlutterEngine(name: "ionic_hybrid_engine_\(UUID().uuidString)")
+        engine.run(withEntrypoint: nil, initialRoute: route)
+        GeneratedPluginRegistrant.register(with: engine)
+        activeEngine = engine
 
-        // 1. Inicializa o FlutterEngine compartilhado (apenas uma vez)
-        //    Reutilizar o engine evita o custo de re-inicializacao do Dart VM.
-        if FlutterRouterPlugin.sharedEngine == nil {
-            let engine = FlutterEngine(name: "ionic_hybrid_engine")
-            engine.run(withEntrypoint: nil, initialRoute: route)
-            GeneratedPluginRegistrant.register(with: engine)
-            FlutterRouterPlugin.sharedEngine = engine
-        }
-
-        guard let engine = FlutterRouterPlugin.sharedEngine else {
+        guard let activeEngine = activeEngine else {
             call.reject("Falha ao inicializar o Flutter Engine")
             return
         }
 
         // 2. Cria o FlutterViewController que hospeda a UI Flutter
-        let flutterVC = FlutterViewController(engine: engine, nibName: nil, bundle: nil)
+        let flutterVC = FlutterViewController(engine: activeEngine, nibName: nil, bundle: nil)
         flutterVC.modalPresentationStyle = .fullScreen
 
         // 3. Configura o MethodChannel para comunicacao bidirecional
         let channel = FlutterMethodChannel(
             name: FlutterRouterPlugin.channelName,
-            binaryMessenger: engine.binaryMessenger
+            binaryMessenger: activeEngine.binaryMessenger
         )
         self.activeChannel = channel
 
@@ -82,22 +77,21 @@ public class FlutterRouterPlugin: CAPPlugin {
                 let returnData = methodCall.arguments as? [String: Any]
 
                 DispatchQueue.main.async {
-                    (flutterVC ?? self.bridge?.viewController?.presentedViewController)
-                        .flatMap { /bin/sh as? UIViewController }
-                        .map { vc in
-                            vc.dismiss(animated: true) {
-                                var ret = JSObject()
-                                ret["completed"] = true
-                                if let data = returnData {
-                                    var jsData = JSObject()
-                                    data.forEach { key, value in
-                                        jsData[key] = value as AnyObject
-                                    }
-                                    ret["data"] = jsData
-                                }
-                                call.resolve(ret)
-                            }
+                    guard let viewController = flutterVC ?? self.bridge?.viewController?.presentedViewController else {
+                        result(nil)
+                        return
+                    }
+
+                    viewController.dismiss(animated: true) {
+                        var ret = JSObject()
+                        ret["completed"] = true
+                        if let data = returnData {
+                            ret["data"] = data
                         }
+                        self.activeChannel = nil
+                        self.activeEngine = nil
+                        call.resolve(ret)
+                    }
                 }
                 result(nil)
 
