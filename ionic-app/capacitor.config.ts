@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   webDir: 'www',
   plugins: {
     FlutterRouter: {
-      flutterModulePath: '../flutter_module',
+      flutterModulePath: '../flutter_module', // not necessary if the Flutter module is in the same workspace, but can be used to specify a custom path
     }
   }
 };

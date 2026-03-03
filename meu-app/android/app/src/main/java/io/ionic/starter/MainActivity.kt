@@ -1,8 +1,8 @@
-package com.example.ionicflutterhybrid
+package io.ionic.starter
 
 import android.os.Bundle
 import com.getcapacitor.BridgeActivity
-import com.example.ionicflutterhybrid.plugins.FlutterRouterPlugin
+import io.ionic.starter.plugins.FlutterRouterPlugin
 
 /**
  * MainActivity — Android

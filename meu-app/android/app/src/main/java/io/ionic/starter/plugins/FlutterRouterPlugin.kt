@@ -1,4 +1,4 @@
-package com.example.ionicflutterhybrid.plugins
+package io.ionic.starter.plugins
 
 import android.app.Activity
 import androidx.activity.result.ActivityResult
@@ -46,7 +46,7 @@ class FlutterRouterPlugin : Plugin() {
 
         // Cria a FlutterActivity com a rota inicial desejada
         val flutterIntent = FlutterActivity
-            .withNewEngine()
+            .NewEngineIntentBuilder(HybridFlutterActivity::class.java)
             .initialRoute(route)
             .build(activity)
             .apply {
